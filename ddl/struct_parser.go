@@ -259,6 +259,17 @@ func (p *StructParser) WriteCatalog(catalog *Catalog) error {
 				default:
 					columnType = "DATETIME"
 				}
+			case "sq.DateField":
+				switch catalog.Dialect {
+				case DialectPostgres:
+					fallthrough
+				case DialectSQLServer:
+					fallthrough
+				case DialectMySQL:
+					columnType = "DATE"
+				default:
+					columnType = "TIMESTAMP"
+				}
 			case "sq.UUIDField":
 				switch p.dialect {
 				case DialectSQLite, DialectPostgres:

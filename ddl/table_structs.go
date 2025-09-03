@@ -274,6 +274,17 @@ func (s *TableStructs) ReadCatalog(catalog *Catalog) error {
 					default:
 						defaultColumnType = "TIMESTAMP"
 					}
+				case "sq.DateField":
+					switch catalog.Dialect {
+					case DialectPostgres:
+						fallthrough
+					case DialectSQLServer:
+						fallthrough
+					case DialectMySQL:
+						defaultColumnType = "DATE"
+					default:
+						defaultColumnType = "TIMESTAMP"
+					}
 				case "sq.UUIDField":
 					switch catalog.Dialect {
 					case DialectSQLite, DialectPostgres:
@@ -479,7 +490,9 @@ func getFieldType(dialect string, column *Column) (fieldType string) {
 		return "sq.NumberField"
 	case "TINYTEXT", "TEXT", "MEDIUMTEXT", "LONGTEXT", "CHAR", "VARCHAR", "NVARCHAR":
 		return "sq.StringField"
-	case "DATE", "TIME", "TIMETZ", "DATETIME", "DATETIME2", "SMALLDATETIME", "DATETIMEOFFSET", "TIMESTAMP", "TIMESTAMPTZ":
+	case "DATE":
+		return "sq.DateField"
+	case "TIME", "TIMETZ", "DATETIME", "DATETIME2", "SMALLDATETIME", "DATETIMEOFFSET", "TIMESTAMP", "TIMESTAMPTZ":
 		return "sq.TimeField"
 	case "UUID", "UNIQUEIDENTIFIER":
 		return "sq.UUIDField"
