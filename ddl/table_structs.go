@@ -6,7 +6,27 @@ import (
 	"go/token"
 	"strconv"
 	"strings"
+	"unicode"
 )
+
+func makeValidIdentifier(s string) string {
+	ss := []rune{}
+
+	for i, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			ss = append(ss, rune('_'))
+			continue
+		}
+
+		if i == 0 && unicode.IsNumber(r) {
+			ss = append(ss, rune('_'))
+		}
+
+		ss = append(ss, r)
+	}
+
+	return string(ss)
+}
 
 // TableStructs is a slice of TableStructs.
 type TableStructs []TableStruct
@@ -72,7 +92,7 @@ func (s *TableStructs) ReadCatalog(catalog *Catalog) error {
 	for _, schema := range catalog.Schemas {
 		for _, table := range schema.Tables {
 			tableStruct := TableStruct{
-				Name:   strings.ToUpper(strings.ReplaceAll(table.TableName, " ", "_")),
+				Name:   strings.ToUpper(makeValidIdentifier(table.TableName)),
 				Fields: make([]StructField, 0, len(table.Columns)+1),
 			}
 			tableStruct.Fields = append(tableStruct.Fields, StructField{Type: "sq.TableStruct"})
@@ -186,7 +206,7 @@ func (s *TableStructs) ReadCatalog(catalog *Catalog) error {
 					continue
 				}
 				structField := StructField{
-					Name: strings.ToUpper(strings.ReplaceAll(column.ColumnName, " ", "_")),
+					Name: strings.ToUpper(makeValidIdentifier(column.ColumnName)),
 					Type: getFieldType(catalog.Dialect, &table.Columns[i]),
 				}
 				if needsQuoting(column.ColumnName) {
