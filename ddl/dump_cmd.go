@@ -1179,6 +1179,11 @@ func writeColumnDefinition(dialect string, buf *bytes.Buffer, defaultCollation s
 	} else if column.ColumnType != "" && !isSQLServerGeneratedColumn {
 		buf.WriteString(" " + strings.ToUpper(column.ColumnType))
 	}
+
+	// SQLServer requires COLLATE after type
+	if dialect == DialectSQLServer && column.CollationName != "" && column.CollationName != defaultCollation {
+		buf.WriteString(` COLLATE ` + column.CollationName)
+	}
 	// PRIMARY KEY
 	if column.IsPrimaryKey && (columnLevelConstraint || dialect == DialectSQLite) {
 		buf.WriteString(" PRIMARY KEY")
@@ -1213,7 +1218,7 @@ func writeColumnDefinition(dialect string, buf *bytes.Buffer, defaultCollation s
 		buf.WriteString(" ON UPDATE CURRENT_TIMESTAMP")
 	}
 	// COLLATE
-	if column.CollationName != "" && column.CollationName != defaultCollation {
+	if column.CollationName != "" && column.CollationName != defaultCollation && dialect != DialectSQLServer {
 		if dialect == DialectPostgres {
 			buf.WriteString(` COLLATE "` + EscapeQuote(column.CollationName, '"') + `"`)
 		} else {
