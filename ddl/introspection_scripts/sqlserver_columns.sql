@@ -24,7 +24,7 @@ SELECT
     ,COALESCE(computed_columns.definition, '') AS generated_expr
     ,COALESCE(computed_columns.is_persisted, 0) AS generated_expr_stored
     ,CASE columns.collation_name
-        WHEN SERVERPROPERTY('collation') THEN ''
+        WHEN cast(DATABASEPROPERTYEX(DB_NAME(), 'Collation') as nvarchar) THEN ''
         ELSE COALESCE(columns.collation_name, '')
     END AS collation_name
     ,COALESCE(OBJECT_DEFINITION(columns.default_object_id), '') AS column_default
